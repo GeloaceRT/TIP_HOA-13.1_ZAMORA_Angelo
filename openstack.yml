@@ -1,5 +1,6 @@
 ---
 - name: Install NTP on Controller Node
+  tags: ntp
   hosts: controller
   become: true
   tasks:
@@ -27,9 +28,8 @@
         - openstack-dashboard
         - rabbitmq-server
         - memcached
-        - mysql-server
         - apache2
-        - libapache2-mod-wsgi
+        - libapache2-mod-wsgi-py3
         - neutron-server
         - keystone
         - glance
@@ -38,25 +38,32 @@
         - openstack_packages  # Tag for the OpenStack packages
 
 - name: Install SQL Database (MySQL) on Controller Node
+  tags: mysql
   hosts: controller
   become: true
   tasks:
-    - name: Install MySQL Server
+    - name: Install MySQL Server Core
       apt:
-        name: mysql-server
+        name: mysql-server-core-8.0
         state: present
       tags:
         - mysql  # Tag for MySQL installation
+        
+    - name: Install MySQL Server 8.0
+      apt:
+        name: mysql-server-8.0
+        state: present
 
     - name: Start MySQL Service
       service:
         name: mysql
-        state: started
+        state: restarted
         enabled: yes
       tags:
         - mysql_service  # Tag for MySQL service
 
 - name: Install Message Queue (RabbitMQ) on Controller Node
+  tags: rabbit
   hosts: controller
   become: true
   tasks:
@@ -76,6 +83,7 @@
         - rabbitmq_service  # Tag for RabbitMQ service
 
 - name: Install Memcached on Controller Node
+  tags: memcached
   hosts: controller
   become: true
   tasks:
@@ -95,6 +103,7 @@
         - memcached_service  # Tag for Memcached service
 
 - name: Install and Configure Etcd on Controller Node
+  tags: etcd
   hosts: controller
   become: true
   tasks:
